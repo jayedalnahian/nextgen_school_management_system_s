@@ -1,0 +1,21 @@
+model Result {
+  id            String   @id @default(uuid())
+  marksObtained Float
+  grade         String?
+  examType      String
+  examDate      DateTime @default(now())
+
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id])
+
+  classId       String
+  class     Class            @relation(fields: [classId], references: [id])
+
+  subjectId     String
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+
+  addedById     String
+  teacher       Teacher  @relation(fields: [addedById], references: [id])
+
+  @@index([studentId, classId])
+}

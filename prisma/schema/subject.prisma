@@ -1,0 +1,20 @@
+model Subject {
+  id          String         @id @default(uuid())
+  name       String
+  subjectCode String?        @unique
+  classes     ClassSubject[]
+  results     Result[]
+}
+
+model ClassSubject {
+  classId    String
+  subjectId  String
+  totalMarks Int     @default(100)
+  passMarks  Int     @default(33)
+  isOptional Boolean @default(false)
+
+  class      Class   @relation(fields: [classId], references: [id])
+  subject    Subject @relation(fields: [subjectId], references: [id])
+
+  @@id([classId, subjectId])
+}

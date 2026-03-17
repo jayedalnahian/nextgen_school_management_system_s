@@ -1,0 +1,25 @@
+model Teacher {
+  id             String         @id @default(uuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id])
+  phone          String         @unique
+  specialization String
+  qualification  String
+  joiningDate    DateTime
+  bio            String?        @db.Text
+  classes        ClassTeacher[]
+  attendances    Attendance[]
+  results        Result[]
+}
+
+model ClassTeacher {
+  teacherId      String
+  classId        String
+  isClassTeacher Boolean  @default(false)
+  assignedAt     DateTime @default(now())
+
+  teacher        Teacher  @relation(fields: [teacherId], references: [id])
+  class          Class    @relation(fields: [classId], references: [id])
+
+  @@id([teacherId, classId])
+}

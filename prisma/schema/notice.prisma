@@ -1,0 +1,15 @@
+model Notice {
+  id          String         @id @default(uuid())
+  title       String
+  content     String         @db.Text
+  audience    NoticeAudience @default(ALL)
+  attachment  String?
+  isPublished Boolean        @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime       @default(now())
+
+  authorId    String
+  author      User           @relation(fields: [authorId], references: [id])
+
+  @@index([audience, isPublished])
+}

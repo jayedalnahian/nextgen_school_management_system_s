@@ -1,0 +1,20 @@
+model Student {
+  id            String       @id @default(uuid())
+  studentID     String       @unique 
+  name          String
+  roll          Int
+  dob           DateTime
+  gender        String
+  admissionDate DateTime     @default(now())
+  isDeleted     Boolean      @default(false)
+
+  parentId      String
+  parent        Parent       @relation(fields: [parentId], references: [id])
+
+  classId       String
+  class         Class        @relation(fields: [classId], references: [id])
+
+  attendances   Attendance[]
+  results       Result[]
+  payments      Payment[]
+}

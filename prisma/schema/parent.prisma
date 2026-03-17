@@ -1,0 +1,11 @@
+model Parent {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id])
+  phone            String    @unique
+  address          String    @db.Text
+  occupation       String?
+  stripeCustomerId String?   @unique
+  students         Student[]
+  payments         Payment[]
+}

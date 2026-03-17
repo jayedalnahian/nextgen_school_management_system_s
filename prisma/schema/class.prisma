@@ -1,0 +1,14 @@
+model Class {
+  id         String         @id @default(uuid())
+  name       String
+  section    String?
+  monthlyFee Float          @default(0)
+  capacity   Int?
+  isDeleted  Boolean        @default(false)
+
+  students   Student[]
+  teachers   ClassTeacher[]
+  subjects   ClassSubject[]
+  attendances Attendance[]
+  results    Result[]
+}

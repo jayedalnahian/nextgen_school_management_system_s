@@ -1,0 +1,17 @@
+model Attendance {
+  id        String           @id @default(uuid())
+  date      DateTime
+  status    AttendanceStatus
+  remarks   String?
+
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id])
+
+  classId   String
+  class     Class            @relation(fields: [classId], references: [id])
+
+  takenById String
+  teacher   Teacher          @relation(fields: [takenById], references: [id])
+
+  @@index([date, classId])
+}
