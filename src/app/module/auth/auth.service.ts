@@ -76,6 +76,9 @@ const registerUser = async (payload: UserPayload) => {
         });
       }
 
+    
+          
+
       return { user: authResponse.user, profile };
     });
 
