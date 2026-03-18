@@ -3,6 +3,7 @@ model Teacher {
   userId         String         @unique
   user           User           @relation(fields: [userId], references: [id])
   phone          String         @unique
+  image          String?
   specialization String
   qualification  String
   joiningDate    DateTime

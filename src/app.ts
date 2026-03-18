@@ -1,8 +1,9 @@
 import express, { type Application, type Request, type Response } from "express";
 import cors from "cors";
-import globalErrorHandler from "./app/middleware/globalErrorHandler.js";
+
 import notFound from "./app/middleware/notFound.js";
-import router from "./app/routes/index.js";
+import { IndexRoutes } from "./app/routes/index.js";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
 
 const app: Application = express();
 
@@ -11,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 // Application routes
-app.use("/api/v1", router);
+app.use("/api/v1", IndexRoutes);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("NextGen School Management System Server is running!");

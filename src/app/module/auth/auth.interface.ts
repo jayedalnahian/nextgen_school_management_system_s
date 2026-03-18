@@ -5,6 +5,7 @@ interface BasePayload {
   password: string;
   name: string;
   phone: string;
+  image?: string;
 }
 
 interface ParentPayload extends BasePayload {
@@ -24,7 +25,6 @@ interface TeacherPayload extends BasePayload {
 interface AdminPayload extends BasePayload {
   role: typeof Role.ADMIN;
   designation: string;
-  image: string;
   joiningDate: Date;
 }
 

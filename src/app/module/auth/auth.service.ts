@@ -44,6 +44,7 @@ const registerUser = async (payload: UserPayload) => {
             phone: payload.phone,
             address: payload.address,
             occupation: payload.occupation,
+            image: payload.image,
           },
         });
       } 
@@ -53,6 +54,7 @@ const registerUser = async (payload: UserPayload) => {
           data: {
             userId: userId,
             phone: payload.phone,
+            image: payload.image,
             specialization: payload.specialization,
             qualification: payload.qualification,
             joiningDate: new Date(payload.joiningDate),
@@ -64,6 +66,8 @@ const registerUser = async (payload: UserPayload) => {
         profile = await tx.admin.create({
           data: {
             userId: userId,
+            name : payload.name,
+            email : payload.email,
             phone: payload.phone,
             designation: payload.designation,
             image: payload.image,

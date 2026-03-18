@@ -5,6 +5,7 @@ model Parent {
   phone            String    @unique
   address          String    @db.Text
   occupation       String?
+  image            String?
   stripeCustomerId String?   @unique
   students         Student[]
   payments         Payment[]
