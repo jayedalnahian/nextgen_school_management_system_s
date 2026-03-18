@@ -1,7 +1,7 @@
 model Teacher {
   id             String         @id @default(uuid())
   userId         String         @unique
-  user           User           @relation(fields: [userId], references: [id])
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   phone          String         @unique
   image          String?
   specialization String
@@ -19,8 +19,8 @@ model ClassTeacher {
   isClassTeacher Boolean  @default(false)
   assignedAt     DateTime @default(now())
 
-  teacher        Teacher  @relation(fields: [teacherId], references: [id])
-  class          Class    @relation(fields: [classId], references: [id])
+  teacher        Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  class          Class    @relation(fields: [classId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([teacherId, classId])
 }

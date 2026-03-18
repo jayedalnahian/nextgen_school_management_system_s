@@ -5,10 +5,10 @@ model Attendance {
   remarks   String?
 
   studentId String
-  student   Student          @relation(fields: [studentId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   classId   String
-  class     Class            @relation(fields: [classId], references: [id])
+  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   takenById String
   teacher   Teacher          @relation(fields: [takenById], references: [id])

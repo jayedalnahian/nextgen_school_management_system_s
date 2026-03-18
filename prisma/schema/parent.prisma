@@ -1,7 +1,7 @@
 model Parent {
   id               String    @id @default(uuid())
   userId           String    @unique
-  user             User      @relation(fields: [userId], references: [id])
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   phone            String    @unique
   address          String    @db.Text
   occupation       String?

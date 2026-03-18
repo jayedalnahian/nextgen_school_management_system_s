@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextFunction, Request, Response } from "express";
-import { UserStatus, type Role } from "../../generated/prisma/index.js";
-import { CookieUtils } from "../utils/coocie.js";
+import prismaPkg from "../../generated/prisma/index.js";
+const { Role, UserStatus } = prismaPkg;
+export type Role = (typeof Role)[keyof typeof Role];
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
+import { CookieUtils } from "../utils/cookie.js";
 import { prisma } from "../lib/prisma.js";
 import status from "http-status";
 import AppError from "../errorHealpers/AppError.js";
@@ -20,83 +23,74 @@ export const checkAuth =
       );
 
       if (!sessionToken) {
-        throw new Error("Unauthorized access! No session token provided.");
+        throw new AppError(
+          status.UNAUTHORIZED,
+          "Unauthorized access! No session token provided.",
+        );
       }
 
-      if (sessionToken) {
-        const sessionExists = await prisma.session.findFirst({
-          where: {
-            token: sessionToken,
-            expiresAt: {
-              gt: new Date(),
-            },
+      const sessionExists = await prisma.session.findFirst({
+        where: {
+          token: sessionToken,
+          expiresAt: {
+            gt: new Date(),
           },
-          include: {
-            user: true,
-          },
-        });
+        },
+        include: {
+          user: true,
+        },
+      });
 
-        if (sessionExists && sessionExists.user) {
-          const user = sessionExists.user;
-
-          const now = new Date();
-          const expiresAt = new Date(sessionExists.expiresAt);
-          const createdAt = new Date(sessionExists.createdAt);
-
-          const sessionLifeTime = expiresAt.getTime() - createdAt.getTime();
-          const timeRemaining = expiresAt.getTime() - now.getTime();
-          const percentRemaining = (timeRemaining / sessionLifeTime) * 100;
-
-          if (percentRemaining < 20) {
-            res.setHeader("X-Session-Refresh", "true");
-            res.setHeader("X-Session-Expires-At", expiresAt.toISOString());
-            res.setHeader("X-Time-Remaining", timeRemaining.toString());
-
-            console.log("Session Expiring Soon!!");
-          }
-
-          if (
-            user.status === UserStatus.INACTIVE ||
-            user.status === UserStatus.SUSPENDED
-          ) {
-            throw new AppError(
-              status.UNAUTHORIZED,
-              "Unauthorized access! User is not active.",
-            );
-          }
-
-          if (user.isDeleted) {
-            throw new AppError(
-              status.UNAUTHORIZED,
-              "Unauthorized access! User is deleted.",
-            );
-          }
-
-          if (authRoles.length > 0 && !authRoles.includes(user.role)) {
-            throw new AppError(
-              status.FORBIDDEN,
-              "Forbidden access! You do not have permission to access this resource.",
-            );
-          }
-
-          req.user = {
-            userId: user.id,
-            role: user.role,
-            email: user.email,
-          };
-        }
-
-        const accessToken = CookieUtils.getCookie(req, "accessToken");
-
-        if (!accessToken) {
-          throw new AppError(
-            status.UNAUTHORIZED,
-            "Unauthorized access! No access token provided.",
-          );
-        }
+      if (!sessionExists || !sessionExists.user) {
+        throw new AppError(
+          status.UNAUTHORIZED,
+          "Unauthorized access! Invalid or expired session.",
+        );
       }
 
-      //Access Token Verification
+      const user = sessionExists.user;
+
+      const now = new Date();
+      const expiresAt = new Date(sessionExists.expiresAt);
+      const createdAt = new Date(sessionExists.createdAt);
+
+      const sessionLifeTime = expiresAt.getTime() - createdAt.getTime();
+      const timeRemaining = expiresAt.getTime() - now.getTime();
+      const percentRemaining = (timeRemaining / sessionLifeTime) * 100;
+
+      if (percentRemaining < 20) {
+        res.setHeader("X-Session-Refresh", "true");
+        res.setHeader("X-Session-Expires-At", expiresAt.toISOString());
+        res.setHeader("X-Time-Remaining", timeRemaining.toString());
+      }
+
+      if (user.status === UserStatus.INACTIVE || user.status === UserStatus.SUSPENDED) {
+        throw new AppError(
+          status.UNAUTHORIZED,
+          "Unauthorized access! User is not active.",
+        );
+      }
+
+      if (user.isDeleted) {
+        throw new AppError(
+          status.UNAUTHORIZED,
+          "Unauthorized access! User is deleted.",
+        );
+      }
+
+      if (authRoles.length > 0 && !authRoles.includes(user.role)) {
+        throw new AppError(
+          status.FORBIDDEN,
+          "Forbidden access! You do not have permission to access this resource.",
+        );
+      }
+
+      req.user = {
+        userId: user.id,
+        role: user.role,
+        email: user.email,
+      };
+
       const accessToken = CookieUtils.getCookie(req, "accessToken");
 
       if (!accessToken) {
@@ -125,6 +119,16 @@ export const checkAuth =
         throw new AppError(
           status.FORBIDDEN,
           "Forbidden access! You do not have permission to access this resource.",
+        );
+      }
+
+      if (
+        verifiedToken.data?.userId &&
+        verifiedToken.data.userId !== user.id
+      ) {
+        throw new AppError(
+          status.UNAUTHORIZED,
+          "Unauthorized access! Token does not match session.",
         );
       }
 

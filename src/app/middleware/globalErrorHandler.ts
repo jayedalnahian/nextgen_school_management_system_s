@@ -5,7 +5,8 @@ import z from "zod";
 
 import { handlePrismaClientKnownRequestError, handlePrismaClientUnknownError, handlePrismaClientValidationError, handlerPrismaClientInitializationError, handlerPrismaClientRustPanicError } from "../errorHealpers/handlePrismaErrors.js";
 import { envVars } from "../config/env.js";
-import { Prisma } from "../../generated/prisma/index.js";
+import prismaPkg from "../../generated/prisma/index.js";
+const { Prisma } = prismaPkg;
 import AppError from "../errorHealpers/AppError.js";
 import type { TErrorResponse, TErrorSources } from "../interface/error.interface.js";
 import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFilesFromGlobalErrorHandler.js";

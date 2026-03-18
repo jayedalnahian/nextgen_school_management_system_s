@@ -6,13 +6,13 @@ model Result {
   examDate      DateTime @default(now())
 
   studentId     String
-  student       Student  @relation(fields: [studentId], references: [id])
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   classId       String
-  class     Class            @relation(fields: [classId], references: [id])
+  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  subjectId     String
-  subject       Subject  @relation(fields: [subjectId], references: [id])
+  subjectId     String  
+  subject       Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   addedById     String
   teacher       Teacher  @relation(fields: [addedById], references: [id])

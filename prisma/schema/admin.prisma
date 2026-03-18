@@ -3,7 +3,7 @@ model Admin {
   userId      String    @unique
   name        String
   email       String    @unique
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   designation String
   phone       String?   @unique
   joiningDate DateTime  @default(now())
