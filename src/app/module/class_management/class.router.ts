@@ -27,4 +27,6 @@ router.patch(
   ClassController.updateClass
 );
 
+router.delete("/:id", checkAuth(Role.ADMIN), ClassController.deleteClass);
+
 export const ClassRoutes = router;

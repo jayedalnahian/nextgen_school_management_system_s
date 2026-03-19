@@ -85,8 +85,45 @@ const updateClassInDB = async (id: string, payload: Partial<IClass>) => {
   return result;
 };
 
+const softDeleteClassFromDB = async (id: string) => {
+  const isClassExists = await prisma.class.findUnique({
+    where: { id },
+  });
+
+  if (!isClassExists) {
+    throw new AppError(status.NOT_FOUND, "Class not found.");
+  }
+
+  if (isClassExists.isDeleted) {
+    return { message: "Class is already deleted." };
+  }
+
+  // Dependency check: Count non-deleted students
+  const activeStudentCount = await prisma.student.count({
+    where: { classId: id, isDeleted: false },
+  });
+
+  if (activeStudentCount > 0) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Cannot delete class with active students. Transfer students before deleting.",
+    );
+  }
+
+  const result = await prisma.class.update({
+    where: { id },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+  });
+
+  return result;
+};
+
 export const ClassService = {
   createClassInDB,
   getAllClassesFromDB,
   updateClassInDB,
+  softDeleteClassFromDB,
 };

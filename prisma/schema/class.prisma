@@ -5,6 +5,7 @@ model Class {
   monthlyFee Float          @default(0)
   capacity   Int?
   isDeleted  Boolean        @default(false)
+  deletedAt  DateTime?
 
   students   Student[]
   teachers   ClassTeacher[]

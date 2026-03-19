@@ -50,8 +50,23 @@ const updateClass = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteClass = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await ClassService.softDeleteClassFromDB(id);
+
+  const isAlreadyDeleted = "message" in result;
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: isAlreadyDeleted ? (result as { message: string }).message : "Class deleted successfully",
+    data: isAlreadyDeleted ? null : result,
+  });
+});
+
 export const ClassController = {
   createClass,
   getAllClasses,
   updateClass,
+  deleteClass,
 };
