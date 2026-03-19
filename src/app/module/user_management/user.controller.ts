@@ -39,7 +39,37 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+import { IRequestUser } from "../../interface/requestUser.interface.js";
+
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const reqUser = req.user as IRequestUser; 
+  const result = await UserService.updateUserInDB(id, req.body, reqUser);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "User updated successfully",
+    data: result,
+  });
+});
+
+const deleteUser = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const reqUser = req.user as IRequestUser;
+  await UserService.softDeleteUserFromDB(id, reqUser);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "User deleted successfully",
+    data: null,
+  });
+});
+
 export const UserController = {
   getAllUsers,
-  getSingleUser
+  getSingleUser,
+  updateUser,
+  deleteUser,
 };
