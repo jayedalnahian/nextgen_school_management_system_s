@@ -14,4 +14,10 @@ router.post(
   ClassController.createClass
 );
 
+router.get(
+  "/",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER),
+  ClassController.getAllClasses
+);
+
 export const ClassRoutes = router;

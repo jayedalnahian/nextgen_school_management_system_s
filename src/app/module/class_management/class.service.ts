@@ -1,9 +1,12 @@
 import status from "http-status";
 import AppError from "../../errorHealpers/AppError.js";
 import { prisma } from "../../lib/prisma.js";
-import { IClass } from "./class.interface.js";
+import { QueryBuilder } from "../../utils/QueryBuilder.js";
+import { classFilterableFields, classSearchableFields } from "./class.constant.js";
+import { IClass, IClassQueryParams } from "./class.interface.js";
 
 const createClassInDB = async (payload: IClass) => {
+  // ... (existing code remains)
   const isClassExists = await prisma.class.findFirst({
     where: {
       name: payload.name,
@@ -23,6 +26,33 @@ const createClassInDB = async (payload: IClass) => {
   return result;
 };
 
+const getAllClassesFromDB = async (query: IClassQueryParams) => {
+  if (query.isDeleted === undefined) {
+    query.isDeleted = "false";
+  }
+
+  const classQuery = new QueryBuilder(prisma.class, query, {
+    searchableFields: classSearchableFields,
+    filterableFields: classFilterableFields,
+  })
+    .search()
+    .filter()
+    .sort()
+    .paginate();
+
+  if (query.include === "students") {
+    classQuery.include({
+      _count: {
+        select: { students: true },
+      },
+    });
+  }
+
+  const result = await classQuery.execute();
+  return result;
+};
+
 export const ClassService = {
   createClassInDB,
+  getAllClassesFromDB,
 };
