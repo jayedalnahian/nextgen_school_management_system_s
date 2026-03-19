@@ -38,7 +38,20 @@ const getAllClasses = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateClass = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await ClassService.updateClassInDB(id, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Class updated successfully",
+    data: result,
+  });
+});
+
 export const ClassController = {
   createClass,
   getAllClasses,
+  updateClass,
 };

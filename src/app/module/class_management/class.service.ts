@@ -52,7 +52,41 @@ const getAllClassesFromDB = async (query: IClassQueryParams) => {
   return result;
 };
 
+const updateClassInDB = async (id: string, payload: Partial<IClass>) => {
+  const isClassExists = await prisma.class.findUnique({
+    where: { id, isDeleted: false },
+  });
+
+  if (!isClassExists) {
+    throw new AppError(status.NOT_FOUND, "Class not found.");
+  }
+
+  // Handle unique constraint check (name + section conflict)
+  if (payload.name || payload.section) {
+    const conflictClass = await prisma.class.findFirst({
+      where: {
+        name: payload.name || isClassExists.name,
+        section: payload.section !== undefined ? payload.section : isClassExists.section,
+        isDeleted: false,
+        NOT: { id },
+      },
+    });
+
+    if (conflictClass) {
+      throw new AppError(status.CONFLICT, "Class with this name and section already exists.");
+    }
+  }
+
+  const result = await prisma.class.update({
+    where: { id },
+    data: payload,
+  });
+
+  return result;
+};
+
 export const ClassService = {
   createClassInDB,
   getAllClassesFromDB,
+  updateClassInDB,
 };

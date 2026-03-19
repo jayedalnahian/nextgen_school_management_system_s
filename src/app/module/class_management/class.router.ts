@@ -20,4 +20,11 @@ router.get(
   ClassController.getAllClasses
 );
 
+router.patch(
+  "/:id",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
+  validateRequest(ClassValidation.updateClassSchema),
+  ClassController.updateClass
+);
+
 export const ClassRoutes = router;

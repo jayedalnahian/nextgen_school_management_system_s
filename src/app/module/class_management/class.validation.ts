@@ -15,6 +15,11 @@ const createClassSchema = z.object({
   }),
 });
 
+const updateClassSchema = z.object({
+  body: createClassSchema.shape.body.partial(),
+});
+
 export const ClassValidation = {
   createClassSchema,
+  updateClassSchema,
 };
