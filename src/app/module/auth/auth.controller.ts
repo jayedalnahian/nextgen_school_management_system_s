@@ -150,6 +150,8 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+// http://localhost:5000/api/v1/auth/login/google?redirect=/profile
 const googleLogin = catchAsync((req: Request, res: Response) => {
   const redirectPath = (req.query.redirect as string) || "/dashboard";
   const encodedRedirectPath = encodeURIComponent(redirectPath);
