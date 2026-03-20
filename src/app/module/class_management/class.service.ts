@@ -121,9 +121,94 @@ const softDeleteClassFromDB = async (id: string) => {
   return result;
 };
 
+const assignTeacherToClassInDB = async (payload: {
+  classId: string;
+  teacherId: string;
+  isClassTeacher: boolean;
+}) => {
+  const { classId, teacherId, isClassTeacher } = payload;
+
+  // 1. Verify class existence
+  const isClassExists = await prisma.class.findUnique({
+    where: { id: classId, isDeleted: false },
+  });
+
+  if (!isClassExists) {
+    throw new AppError(status.NOT_FOUND, "Class not found.");
+  }
+
+  // 2. Verify teacher existence and role
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    include: { user: true },
+  });
+
+  if (!teacher) {
+    throw new AppError(status.NOT_FOUND, "Teacher not found.");
+  }
+
+  if (teacher.user.role !== "TEACHER") {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "The provided teacherId does not belong to a user with TEACHER role.",
+    );
+  }
+
+  // 3. Check for duplicate assignment
+  const isAlreadyAssigned = await prisma.classTeacher.findUnique({
+    where: {
+      teacherId_classId: {
+        teacherId,
+        classId,
+      },
+    },
+  });
+
+  if (isAlreadyAssigned) {
+    throw new AppError(status.CONFLICT, "This teacher is already assigned to this class.");
+  }
+
+  // 4. Prisma Transaction for Class Teacher swap logic
+  const result = await prisma.$transaction(async (tx) => {
+    if (isClassTeacher) {
+      // Find existing class teacher for this class
+      const existingClassTeacher = await tx.classTeacher.findFirst({
+        where: { classId, isClassTeacher: true },
+      });
+
+      if (existingClassTeacher) {
+        // Set their isClassTeacher to false
+        await tx.classTeacher.update({
+          where: {
+            teacherId_classId: {
+              teacherId: existingClassTeacher.teacherId,
+              classId: existingClassTeacher.classId,
+            },
+          },
+          data: { isClassTeacher: false },
+        });
+      }
+    }
+
+    // Create the new assignment
+    const assignment = await tx.classTeacher.create({
+      data: {
+        teacherId,
+        classId,
+        isClassTeacher,
+      },
+    });
+
+    return assignment;
+  });
+
+  return result;
+};
+
 export const ClassService = {
   createClassInDB,
   getAllClassesFromDB,
   updateClassInDB,
   softDeleteClassFromDB,
+  assignTeacherToClassInDB,
 };

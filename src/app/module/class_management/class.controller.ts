@@ -64,9 +64,21 @@ const deleteClass = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const assignTeacher = catchAsync(async (req: Request, res: Response) => {
+  const result = await ClassService.assignTeacherToClassInDB(req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Teacher assigned to class successfully",
+    data: result,
+  });
+});
+
 export const ClassController = {
   createClass,
   getAllClasses,
   updateClass,
   deleteClass,
+  assignTeacher,
 };

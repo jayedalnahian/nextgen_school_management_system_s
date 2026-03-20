@@ -11,20 +11,27 @@ router.post(
   "/",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
   validateRequest(ClassValidation.createClassSchema),
-  ClassController.createClass
+  ClassController.createClass,
+);
+
+router.post(
+  "/assign-teacher",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
+  validateRequest(ClassValidation.assignTeacherSchema),
+  ClassController.assignTeacher,
 );
 
 router.get(
   "/",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER),
-  ClassController.getAllClasses
+  ClassController.getAllClasses,
 );
 
 router.patch(
   "/:id",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
   validateRequest(ClassValidation.updateClassSchema),
-  ClassController.updateClass
+  ClassController.updateClass,
 );
 
 router.delete("/:id", checkAuth(Role.ADMIN), ClassController.deleteClass);
