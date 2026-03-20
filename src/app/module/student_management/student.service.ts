@@ -2,8 +2,12 @@ import { prisma } from "../../lib/prisma.js";
 import AppError from "../../errorHealpers/AppError.js";
 import status from "http-status";
 import { generateRoll, generateStudentId } from "../../utils/student.utils.js";
+import { QueryBuilder } from "../../utils/QueryBuilder.js";
+import { studentFilterableFields, studentSearchableFields } from "./student.constant.js";
+import { IQueryParams } from "../../interface/query.interface.js";
 
 const createStudentInDB = async (payload: any) => {
+  // ... (existing code remains)
   const { name, dob, gender, classId, parentId } = payload;
 
   // 1. Verify Parent existence
@@ -56,6 +60,26 @@ const createStudentInDB = async (payload: any) => {
   return result;
 };
 
+const getAllStudentsFromDB = async (query: IQueryParams) => {
+  const studentQuery = new QueryBuilder(prisma.student, query, {
+    searchableFields: studentSearchableFields,
+    filterableFields: studentFilterableFields,
+  })
+    .search()
+    .filter()
+    .paginate()
+    .sort()
+    .where({ isDeleted: false })
+    .include({
+      class: true,
+      parent: true,
+    });
+
+  const result = await studentQuery.execute();
+  return result;
+};
+
 export const StudentService = {
   createStudentInDB,
+  getAllStudentsFromDB,
 };

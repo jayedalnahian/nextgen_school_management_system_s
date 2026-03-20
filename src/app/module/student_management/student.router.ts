@@ -14,4 +14,10 @@ router.post(
   StudentController.createStudent,
 );
 
+router.get(
+  "/",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER),
+  StudentController.getAllStudents,
+);
+
 export const StudentRoutes = router;
