@@ -75,10 +75,22 @@ const assignTeacher = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const assignSubject = catchAsync(async (req: Request, res: Response) => {
+  const result = await ClassService.assignSubjectToClassInDB(req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Subjects assigned to class successfully",
+    data: result,
+  });
+});
+
 export const ClassController = {
   createClass,
   getAllClasses,
   updateClass,
   deleteClass,
   assignTeacher,
+  assignSubject,
 };

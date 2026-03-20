@@ -27,8 +27,30 @@ const assignTeacherSchema = z.object({
   }),
 });
 
+const assignSubjectSchema = z.object({
+  body: z.object({
+    classId: z.string({ message: "Class ID is required" }).uuid("Invalid Class ID"),
+    subjects: z
+      .array(
+        z
+          .object({
+            subjectId: z.string({ message: "Subject ID is required" }).uuid("Invalid Subject ID"),
+            totalMarks: z.number().int().min(1).default(100).optional(),
+            passMarks: z.number().int().min(1).default(33).optional(),
+            isOptional: z.boolean().default(false).optional(),
+          })
+          .refine((data) => (data.passMarks ?? 33) < (data.totalMarks ?? 100), {
+            message: "Pass marks must be less than total marks",
+            path: ["passMarks"],
+          }),
+      )
+      .min(1, "At least one subject must be assigned"),
+  }),
+});
+
 export const ClassValidation = {
   createClassSchema,
   updateClassSchema,
   assignTeacherSchema,
+  assignSubjectSchema,
 };

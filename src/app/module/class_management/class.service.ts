@@ -205,10 +205,93 @@ const assignTeacherToClassInDB = async (payload: {
   return result;
 };
 
+const assignSubjectToClassInDB = async (payload: {
+  classId: string;
+  subjects: {
+    subjectId: string;
+    totalMarks?: number;
+    passMarks?: number;
+    isOptional?: boolean;
+  }[];
+}) => {
+  const { classId, subjects } = payload;
+
+  // 1. Verify class existence
+  const isClassExists = await prisma.class.findUnique({
+    where: { id: classId, isDeleted: false },
+  });
+
+  if (!isClassExists) {
+    throw new AppError(status.NOT_FOUND, "Class not found.");
+  }
+
+  // 2. Bulk Validation: Ensure all subjectIds exist
+  const subjectIds = subjects.map((s) => s.subjectId);
+  const existingSubjects = await prisma.subject.findMany({
+    where: { id: { in: subjectIds } },
+    select: { id: true },
+  });
+
+  if (existingSubjects.length !== subjectIds.length) {
+    const existingIds = existingSubjects.map((s) => s.id);
+    const missingIds = subjectIds.filter((id) => !existingIds.includes(id));
+    throw new AppError(status.NOT_FOUND, `Subjects not found: ${missingIds.join(", ")}`);
+  }
+
+  // 3. Check for already assigned subjects
+  const alreadyAssigned = await prisma.classSubject.findMany({
+    where: {
+      classId,
+      subjectId: { in: subjectIds },
+    },
+  });
+
+  if (alreadyAssigned.length > 0) {
+    const assignedIds = alreadyAssigned.map((a) => a.subjectId);
+    throw new AppError(
+      status.CONFLICT,
+      `Subjects already assigned to this class: ${assignedIds.join(", ")}`,
+    );
+  }
+
+  // 4. Mark logic validation
+  subjects.forEach((s) => {
+    const total = s.totalMarks ?? 100;
+    const pass = s.passMarks ?? 33;
+    if (pass >= total) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        `Pass marks (${pass}) must be less than total marks (${total}) for subject ${s.subjectId}`,
+      );
+    }
+  });
+
+  // 5. Prisma Transaction for bulk assignment
+  const result = await prisma.$transaction(async (tx) => {
+    const assignments = await Promise.all(
+      subjects.map((s) =>
+        tx.classSubject.create({
+          data: {
+            classId,
+            subjectId: s.subjectId,
+            totalMarks: s.totalMarks ?? 100,
+            passMarks: s.passMarks ?? 33,
+            isOptional: s.isOptional ?? false,
+          },
+        }),
+      ),
+    );
+    return assignments;
+  });
+
+  return result;
+};
+
 export const ClassService = {
   createClassInDB,
   getAllClassesFromDB,
   updateClassInDB,
   softDeleteClassFromDB,
   assignTeacherToClassInDB,
+  assignSubjectToClassInDB,
 };

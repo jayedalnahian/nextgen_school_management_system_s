@@ -1,0 +1,18 @@
+export const dummyClasses = [
+  { name: "Nursery", section: "A", monthlyFee: 800, capacity: 30, isDeleted: false },
+  { name: "Kindergarten", section: "A", monthlyFee: 900, capacity: 30, isDeleted: false },
+  { name: "Class 1", section: "A", monthlyFee: 1000, capacity: 40, isDeleted: false },
+  { name: "Class 2", section: "A", monthlyFee: 1100, capacity: 40, isDeleted: false },
+  { name: "Class 3", section: "A", monthlyFee: 1200, capacity: 40, isDeleted: false },
+  { name: "Class 4", section: "A", monthlyFee: 1300, capacity: 40, isDeleted: false },
+  { name: "Class 5", section: "A", monthlyFee: 1400, capacity: 40, isDeleted: false },
+  { name: "Class 6", section: "A", monthlyFee: 1500, capacity: 40, isDeleted: false },
+  { name: "Class 7", section: "A", monthlyFee: 1600, capacity: 40, isDeleted: false },
+  { name: "Class 8", section: "A", monthlyFee: 1700, capacity: 40, isDeleted: false },
+  { name: "Class 9", section: "A", monthlyFee: 1800, capacity: 40, isDeleted: false },
+  { name: "Class 10", section: "A", monthlyFee: 2000, capacity: 40, isDeleted: false },
+  { name: "Class 11 (Science)", section: "A", monthlyFee: 2500, capacity: 35, isDeleted: false },
+  { name: "Class 11 (Commerce)", section: "A", monthlyFee: 2200, capacity: 35, isDeleted: false },
+  { name: "Class 12 (Science)", section: "A", monthlyFee: 2500, capacity: 35, isDeleted: false },
+  { name: "Class 12 (Commerce)", section: "A", monthlyFee: 2200, capacity: 35, isDeleted: false },
+];

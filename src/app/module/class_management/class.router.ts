@@ -21,6 +21,13 @@ router.post(
   ClassController.assignTeacher,
 );
 
+router.post(
+  "/assign-subject",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
+  validateRequest(ClassValidation.assignSubjectSchema),
+  ClassController.assignSubject,
+);
+
 router.get(
   "/",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER),
