@@ -15,6 +15,18 @@ const createAttendanceSchema = z.object({
   }),
 });
 
+const getAttendanceReportSchema = z.object({
+  query: z.object({
+    classId: z.string(),
+    studentId: z.string().optional(),
+    date: z.string().optional(),
+    month: z.string().optional(),
+    year: z.string().optional(),
+  }),
+});
+
+
 export const AttendanceValidation = {
   createAttendanceSchema,
+  getAttendanceReportSchema,
 };

@@ -16,6 +16,21 @@ const createAttendance = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAttendanceReport = catchAsync(async (req: Request, res: Response) => {
+  const result = await AttendanceService.getAttendanceReportFromDB(
+    req.user as any,
+    req.query
+  );
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Attendance report fetched successfully",
+    data: result,
+  });
+});
+
 export const AttendanceController = {
   createAttendance,
+  getAttendanceReport,
 };

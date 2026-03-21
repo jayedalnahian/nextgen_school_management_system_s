@@ -104,6 +104,120 @@ const createAttendanceInDB = async (userId: string, payload : ICreateAttendanceP
   return result;
 };
 
+const getAttendanceReportFromDB = async (
+  user: { userId: string; role: string },
+  query: any
+) => {
+  const { classId, studentId, date, month, year } = query;
+
+  // 1. Access Control
+  if (user.role === "TEACHER") {
+    const teacher = await prisma.teacher.findUnique({
+      where: { userId: user.userId },
+    });
+
+    if (!teacher) {
+      throw new AppError(status.NOT_FOUND, "Teacher record not found.");
+    }
+
+    const isAssigned = await prisma.classTeacher.findUnique({
+      where: {
+        teacherId_classId: {
+          teacherId: teacher.id,
+          classId,
+        },
+      },
+    });
+
+    if (!isAssigned) {
+      throw new AppError(status.FORBIDDEN, "You are not assigned to this class.");
+    }
+  }
+
+  // 2. Build Prisma Filter
+  const where: any = { classId };
+
+  if (studentId) {
+    where.studentId = studentId;
+  }
+
+  if (date) {
+    const searchDate = new Date(date);
+    searchDate.setHours(0, 0, 0, 0);
+    where.date = searchDate;
+  } else if (month && year) {
+    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
+    where.date = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
+
+  // 3. Fetch Data
+  const [attendances, studentCount] = await Promise.all([
+    prisma.attendance.findMany({
+      where,
+      include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+            studentID: true,
+            roll: true,
+          },
+        },
+      },
+      orderBy: { date: "asc" },
+    }),
+    prisma.student.count({
+      where: { classId, isDeleted: false },
+    }),
+  ]);
+
+  // 4. Aggregate Stats
+  const summary = {
+    totalStudents: studentCount,
+    present: attendances.filter((a) => a.status === AttendanceStatus.PRESENT).length,
+    absent: attendances.filter((a) => a.status === AttendanceStatus.ABSENT).length,
+    late: attendances.filter((a) => a.status === AttendanceStatus.LATE).length,
+  };
+
+  // 5. Monthly Specific Logic (Percentage per student)
+  let studentSummaries = undefined;
+  if (month && year) {
+    const studentRecords: Record<string, { total: number; present: number; student: any }> = {};
+
+    attendances.forEach((a) => {
+      if (!studentRecords[a.studentId]) {
+        studentRecords[a.studentId] = {
+          total: 0,
+          present: 0,
+          student: a.student,
+        };
+      }
+      studentRecords[a.studentId].total++;
+      if (a.status === AttendanceStatus.PRESENT) {
+        studentRecords[a.studentId].present++;
+      }
+    });
+
+    studentSummaries = Object.values(studentRecords).map((record) => ({
+      student: record.student,
+      totalDays: record.total,
+      presentDays: record.present,
+      percentage: ((record.present / record.total) * 100).toFixed(2) + "%",
+    }));
+  }
+
+  return {
+    summary,
+    studentSummaries,
+    data: attendances,
+  };
+};
+
 export const AttendanceService = {
   createAttendanceInDB,
+  getAttendanceReportFromDB,
 };

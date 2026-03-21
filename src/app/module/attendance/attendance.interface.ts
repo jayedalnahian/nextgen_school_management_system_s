@@ -9,3 +9,4 @@ export interface ICreateAttendancePayload {
     remarks?: string;
   }[];
 }
+

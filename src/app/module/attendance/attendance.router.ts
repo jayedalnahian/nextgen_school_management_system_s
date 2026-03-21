@@ -14,4 +14,11 @@ router.post(
   AttendanceController.createAttendance,
 );
 
+router.get(
+  "/report",
+  checkAuth(Role.ADMIN, Role.TEACHER),
+  validateRequest(AttendanceValidation.getAttendanceReportSchema),
+  AttendanceController.getAttendanceReport,
+);
+
 export const AttendanceRoutes = router;
