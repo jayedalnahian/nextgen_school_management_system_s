@@ -10,6 +10,13 @@ const createStudentSchema = z.object({
   }),
 });
 
+const promoteStudentSchema = z.object({
+  body: z.object({
+    nextClassId: z.string(),
+  }),
+});
+
 export const StudentValidation = {
   createStudentSchema,
+  promoteStudentSchema,
 };

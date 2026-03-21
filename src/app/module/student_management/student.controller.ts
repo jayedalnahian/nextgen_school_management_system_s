@@ -27,7 +27,20 @@ const getAllStudents = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const promoteStudent = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await StudentService.promoteStudentInDB(id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Student promoted successfully",
+    data: result,
+  });
+});
+
 export const StudentController = {
   createStudent,
   getAllStudents,
+  promoteStudent,
 };
