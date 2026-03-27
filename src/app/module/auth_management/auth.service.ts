@@ -264,6 +264,10 @@ const getMe = async (user: IRequestUser) => {
 };
 
 const getNewToken = async (refreshToken: string, sessionToken: string) => {
+  if (!refreshToken || !sessionToken) {
+    throw new AppError(status.UNAUTHORIZED, "Refresh token or session token is missing");
+  }
+
   const isSessionTokenExists = await prisma.session.findUnique({
     where: {
       token: sessionToken,
@@ -406,6 +410,29 @@ const verifyEmail = async (payload: IVerifyEmailPayload) => {
   }
 };
 
+const resendVerificationEmail = async (payload: { email: string }) => {
+  const { email } = payload;
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  if (user.emailVerified) {
+    throw new AppError(status.BAD_REQUEST, "Email already verified");
+  }
+
+  await auth.api.sendVerificationEmail({
+    body: {
+      email,
+    },
+  });
+};
+
 const forgetPassword = async (payload: IForgetPasswordPayload) => {
   const { email } = payload;
   const isUserExist = await prisma.user.findUnique({
@@ -515,6 +542,7 @@ export const AuthService = {
   changePassword,
   logoutUser,
   verifyEmail,
+  resendVerificationEmail,
   forgetPassword,
   resetPassword,
   googleLoginSuccess,

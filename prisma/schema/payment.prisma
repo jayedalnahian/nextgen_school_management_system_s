@@ -1,17 +1,19 @@
 model Payment {
-  id         String        @id @default(uuid())
-  amount     Float
-  status     PaymentStatus @default(PENDING)
-  month      String
-  stripeId   String        @unique
-  receiptUrl String?
-  createdAt  DateTime      @default(now())
+  id                 String        @id @default(uuid())
+  amount             Float
+  status             PaymentStatus @default(PENDING)
+  month              String
+  transactionId      String        @unique @db.Uuid()
+  stripeEventId      String?       @unique
+  invoiceUrl         String?
+  paymentGatewayData Json?
+  createdAt          DateTime      @default(now())
 
-  parentId   String
-  parent     Parent        @relation(fields: [parentId], references: [id])
+  parentId String
+  parent   Parent @relation(fields: [parentId], references: [id])
 
-  studentId  String
-  student    Student       @relation(fields: [studentId], references: [id])
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
 
   @@index([parentId, studentId])
 }

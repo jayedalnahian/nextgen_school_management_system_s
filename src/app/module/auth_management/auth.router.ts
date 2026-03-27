@@ -46,7 +46,13 @@ router.post(
 );
 
 router.post(
-  "/forget-password",
+  "/resend-verification-email",
+  validateRequest(AuthValidation.ForgetPasswordValidationSchema),
+  AuthController.resendVerificationEmail,
+);
+
+router.post(
+  "/forgot-password",
   validateRequest(AuthValidation.ForgetPasswordValidationSchema),
   AuthController.forgetPassword,
 );

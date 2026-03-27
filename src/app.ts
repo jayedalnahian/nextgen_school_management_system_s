@@ -18,6 +18,7 @@ app.set("views", "./src/views");
 
 app.use(express.json());
 app.use(cookieParser());
+// app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent)
 app.use(
   cors({
     origin: [

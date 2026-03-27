@@ -102,6 +102,16 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const resendVerificationEmail = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.resendVerificationEmail(req.body);
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Verification email resent successfully",
+    data: result,
+  });
+});
+
 const forgetPassword = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.forgetPassword(req.body);
   sendResponse(res, {
@@ -128,18 +138,18 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
 
   CookieUtils.clearCookie(res, 'accessToken', {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: envVars.NODE_ENV === "production",
+    sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
   });
   CookieUtils.clearCookie(res, 'refreshToken', {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: envVars.NODE_ENV === "production",
+    sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
   });
   CookieUtils.clearCookie(res, 'better-auth.session_token', {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: envVars.NODE_ENV === "production",
+    sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
   });
 
   sendResponse(res, {
@@ -205,6 +215,7 @@ export const AuthController = {
   getNewToken,
   changePassword,
   verifyEmail,
+  resendVerificationEmail,
   forgetPassword,
   resetPassword,
   logoutUser,
