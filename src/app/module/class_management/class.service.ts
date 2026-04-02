@@ -2,11 +2,14 @@ import status from "http-status";
 import AppError from "../../errorHealpers/AppError.js";
 import { prisma } from "../../lib/prisma.js";
 import { QueryBuilder } from "../../utils/QueryBuilder.js";
-import { classFilterableFields, classSearchableFields } from "./class.constant.js";
+import {
+  classFilterableFields,
+  classSearchableFields,
+} from "./class.constant.js";
 import { IClass, IClassQueryParams } from "./class.interface.js";
 
 const createClassInDB = async (payload: IClass) => {
-  // ... (existing code remains)
+  console.log(payload);
   const isClassExists = await prisma.class.findFirst({
     where: {
       name: payload.name,
@@ -16,7 +19,10 @@ const createClassInDB = async (payload: IClass) => {
   });
 
   if (isClassExists) {
-    throw new AppError(status.BAD_REQUEST, "Class with this section already exists.");
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Class with this section already exists.",
+    );
   }
 
   const result = await prisma.class.create({
@@ -38,6 +44,17 @@ const getAllClassesFromDB = async (query: IClassQueryParams) => {
     .search()
     .filter()
     .sort()
+    .dynamicInclude({
+      students: true,
+      teachers: true,
+      subjects: true,
+      results: true,
+    })
+    .include({
+      _count: {
+        select: { students: true, teachers: true, subjects: true },
+      },
+    })
     .paginate();
 
   if (query.include === "students") {
@@ -66,14 +83,20 @@ const updateClassInDB = async (id: string, payload: Partial<IClass>) => {
     const conflictClass = await prisma.class.findFirst({
       where: {
         name: payload.name || isClassExists.name,
-        section: payload.section !== undefined ? payload.section : isClassExists.section,
+        section:
+          payload.section !== undefined
+            ? payload.section
+            : isClassExists.section,
         isDeleted: false,
         NOT: { id },
       },
     });
 
     if (conflictClass) {
-      throw new AppError(status.CONFLICT, "Class with this name and section already exists.");
+      throw new AppError(
+        status.CONFLICT,
+        "Class with this name and section already exists.",
+      );
     }
   }
 
@@ -165,7 +188,10 @@ const assignTeacherToClassInDB = async (payload: {
   });
 
   if (isAlreadyAssigned) {
-    throw new AppError(status.CONFLICT, "This teacher is already assigned to this class.");
+    throw new AppError(
+      status.CONFLICT,
+      "This teacher is already assigned to this class.",
+    );
   }
 
   // 4. Prisma Transaction for Class Teacher swap logic
@@ -235,7 +261,10 @@ const assignSubjectToClassInDB = async (payload: {
   if (existingSubjects.length !== subjectIds.length) {
     const existingIds = existingSubjects.map((s) => s.id);
     const missingIds = subjectIds.filter((id) => !existingIds.includes(id));
-    throw new AppError(status.NOT_FOUND, `Subjects not found: ${missingIds.join(", ")}`);
+    throw new AppError(
+      status.NOT_FOUND,
+      `Subjects not found: ${missingIds.join(", ")}`,
+    );
   }
 
   // 3. Check for already assigned subjects

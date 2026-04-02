@@ -16,7 +16,7 @@ const getAllUsersFromDB = async (query: IUserQueryParams) => {
     query.isDeleted = "false";
   }
 
-  if (!query.fields) {
+  if (!query.fields && !query.include) {
     query.fields =
       "id,email,name,emailVerified,image,createdAt,updatedAt,role,status,needPasswordChange,isDeleted,loginAttempts,lockUntil";
   }
@@ -27,6 +27,7 @@ const getAllUsersFromDB = async (query: IUserQueryParams) => {
   })
     .search()
     .filter()
+    .dynamicInclude({ teacher: true, admin: true, parent: true })
     .sort()
     .paginate()
     .fields();
@@ -45,6 +46,7 @@ const getSingleUser = async (id: string) => {
       parent: true,
       teacher: true,
       admin: true,
+    
     },
   });
 

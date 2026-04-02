@@ -13,7 +13,15 @@ import {
 } from "./student.constant.js";
 import { IQueryParams } from "../../interface/query.interface.js";
 
-const createStudentInDB = async (payload: any) => {
+interface IStudent {
+  name: string;
+  dob: string;
+  gender: string;
+  classId: string;
+  parentId: string;
+}
+
+const createStudentInDB = async (payload: IStudent) => {
   // ... (existing code)
   const { name, dob, gender, classId, parentId } = payload;
   
@@ -154,8 +162,34 @@ const promoteStudentInDB = async (id: string, payload: { nextClassId: string }) 
   return result;
 };
 
+const updateStudentInDB = async (id: string, payload: Partial<IStudent> & { roll?: number }) => {
+  const isStudentExist = await prisma.student.findUnique({
+    where: { id, isDeleted: false },
+  });
+
+  if (!isStudentExist) {
+    throw new AppError(status.NOT_FOUND, "Student not found");
+  }
+
+  const { dob, ...studentData } = payload;
+
+  const modifiedData: any = { ...studentData };
+
+  if (dob) {
+    modifiedData.dob = new Date(dob);
+  }
+
+  const result = await prisma.student.update({
+    where: { id },
+    data: modifiedData,
+  });
+
+  return result;
+};
+
 export const StudentService = {
   createStudentInDB,
   getAllStudentsFromDB,
   promoteStudentInDB,
+  updateStudentInDB,
 };

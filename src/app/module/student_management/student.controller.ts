@@ -39,8 +39,21 @@ const promoteStudent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateStudent = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await StudentService.updateStudentInDB(id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Student updated successfully",
+    data: result,
+  });
+});
+
 export const StudentController = {
   createStudent,
   getAllStudents,
   promoteStudent,
+  updateStudent,
 };

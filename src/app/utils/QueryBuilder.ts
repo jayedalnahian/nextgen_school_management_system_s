@@ -12,7 +12,7 @@ TInclude = Record<string, unknown>
     private page : number = 1;
     private limit : number = 10;
     private skip : number = 0;
-    private sortBy : string = 'createdAt';
+    private sortBy : string = '';
     private sortOrder : 'asc' | 'desc' = 'desc';
     private selectFields: Record<string, boolean> | undefined;
 
@@ -232,11 +232,15 @@ TInclude = Record<string, unknown>
     }
 
     sort () : this {
-        const sortBy = this.queryParams.sortBy || 'createdAt';
+        const sortBy = this.queryParams.sortBy || this.config?.defaultSortBy || '';
         const sortOrder = this.queryParams.sortOrder === 'asc' ? 'asc' : 'desc';
 
         this.sortBy = sortBy;
         this.sortOrder = sortOrder;
+
+        if (!sortBy) {
+            return this;
+        }
 
         // /doctors?sortBy=user.name&sortOrder=asc => orderBy: { user: { name: 'asc' } }
 

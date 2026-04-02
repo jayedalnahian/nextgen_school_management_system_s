@@ -20,11 +20,20 @@ router.get(
   StudentController.getAllStudents,
 );
 
+
+
 router.patch(
   "/:id/promote",
   checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
   validateRequest(StudentValidation.promoteStudentSchema),
   StudentController.promoteStudent,
+);
+
+router.patch(
+  "/:id",
+  checkAuth(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER),
+  validateRequest(StudentValidation.updateStudentSchema),
+  StudentController.updateStudent,
 );
 
 export const StudentRoutes = router;

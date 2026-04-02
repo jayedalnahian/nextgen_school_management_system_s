@@ -1,2 +1,2 @@
-export const classSearchableFields = ["name"];
+export const classSearchableFields = ["name", "id"];
 export const classFilterableFields = ["section", "isDeleted"];

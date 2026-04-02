@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const createClassSchema = z.object({
-  body: z.object({
+
     name: z.string(),
     section: z.string().optional(),
     monthlyFee: z
@@ -12,11 +12,10 @@ const createClassSchema = z.object({
       .int()
       .min(0, "Capacity cannot be negative")
       .optional(),
-  }),
-});
+  });
 
 const updateClassSchema = z.object({
-  body: createClassSchema.shape.body.partial(),
+  body: createClassSchema.partial(),
 });
 
 const assignTeacherSchema = z.object({

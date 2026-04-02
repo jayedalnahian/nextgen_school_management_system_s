@@ -6,6 +6,7 @@ import { ClassService } from "./class.service.js";
 import { IClassQueryParams } from "./class.interface.js";
 
 const createClass = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.body);
   const result = await ClassService.createClassInDB(req.body);
 
   sendResponse(res, {
